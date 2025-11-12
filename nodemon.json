@@ -1,0 +1,11 @@
+{
+  "watch": ["server"],
+  "ext": "js,json",
+  "ignore": ["node_modules", "frontend", "python"],
+  "exec": "node server/index.js",
+  "restartable": "rs",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
+
