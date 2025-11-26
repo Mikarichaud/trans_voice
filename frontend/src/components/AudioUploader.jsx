@@ -45,9 +45,14 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
       formData.append('task', 'transcribe')
       formData.append('temperature', '0.0')
 
-      const pythonApiUrl = import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:8000'
+      const pythonApiUrl = process.env.NODE_ENV === 'production'
+        ? '/api/stt'
+        : (import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:8000')
+      const apiEndpoint = process.env.NODE_ENV === 'production'
+        ? `${pythonApiUrl}/transcribe`
+        : `${pythonApiUrl}/api/stt/transcribe`
       const response = await axios.post(
-        `${pythonApiUrl}/api/stt/transcribe`,
+        apiEndpoint,
         formData,
         {
           headers: {

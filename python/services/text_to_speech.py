@@ -1,10 +1,3 @@
-"""
-Service Text-to-Speech avec support de plusieurs moteurs
-- pyttsx3 (offline, multi-plateforme)
-- gTTS (Google TTS, nécessite internet)
-- Coqui TTS (optionnel, voix haute qualité)
-"""
-
 import pyttsx3
 from gtts import gTTS
 import io
@@ -19,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class TextToSpeechService:
-    """Service de synthèse vocale"""
     
     def __init__(
         self,
@@ -29,21 +21,12 @@ class TextToSpeechService:
         rate: int = 150,
         volume: float = 1.0
     ):
-        """
-        Args:
-            engine: Moteur TTS ("pyttsx3", "gtts", "coqui")
-            language: Code langue (ex: "fr", "en", "pt")
-            voice_id: ID de la voix (pour pyttsx3)
-            rate: Vitesse de parole (mots/min)
-            volume: Volume (0.0 à 1.0)
-        """
         self.engine_name = engine
         self.language = language
         self.rate = rate
         self.volume = volume
         self.voice_id = voice_id
         
-        # Initialiser le moteur
         if engine == "pyttsx3":
             self._init_pyttsx3()
         elif engine == "gtts":
@@ -52,31 +35,24 @@ class TextToSpeechService:
             raise ValueError(f"Moteur TTS non supporté: {engine}")
     
     def _init_pyttsx3(self):
-        """Initialise pyttsx3 (offline)"""
         try:
             self.engine = pyttsx3.init()
             
-            # Configurer la vitesse
             self.engine.setProperty('rate', self.rate)
             
-            # Configurer le volume
             self.engine.setProperty('volume', self.volume)
             
-            # Sélectionner la voix
             voices = self.engine.getProperty('voices')
             if voices:
-                # Chercher une voix pour la langue
                 target_voice = None
                 for voice in voices:
                     if self.language in voice.languages or self.language[:2] in str(voice.languages):
                         target_voice = voice.id
                         break
                 
-                # Si aucune voix trouvée, utiliser la première disponible
                 if not target_voice and voices:
                     target_voice = voices[0].id
                 
-                # Utiliser la voix spécifiée ou la voix par défaut
                 if self.voice_id:
                     target_voice = self.voice_id
                 
@@ -91,8 +67,6 @@ class TextToSpeechService:
             raise
     
     def _init_gtts(self):
-        """Initialise gTTS (nécessite internet)"""
-        # gTTS n'a pas besoin d'initialisation
         logger.info("Moteur gTTS prêt (nécessite internet)")
     
     def synthesize(
@@ -101,17 +75,6 @@ class TextToSpeechService:
         output_path: Optional[str] = None,
         slow: bool = False
     ) -> Tuple[bytes, Dict]:
-        """
-        Synthétise le texte en audio
-        
-        Args:
-            text: Texte à synthétiser
-            output_path: Chemin de sortie (optionnel)
-            slow: Parler lentement (pour gTTS)
-        
-        Returns:
-            Tuple (audio_bytes, metadata)
-        """
         start_time = time.time()
         
         if not text or not text.strip():
@@ -129,10 +92,8 @@ class TextToSpeechService:
         text: str,
         output_path: Optional[str] = None
     ) -> Tuple[bytes, Dict]:
-        """Synthèse avec pyttsx3"""
         start_time = time.time()
         try:
-            # Créer un fichier temporaire si nécessaire
             if not output_path:
                 temp_file = tempfile.NamedTemporaryFile(
                     suffix='.wav',
@@ -141,16 +102,13 @@ class TextToSpeechService:
                 output_path = temp_file.name
                 temp_file.close()
             
-            # Sauvegarder dans un fichier
             self.engine.save_to_file(text, output_path)
             self.engine.runAndWait()
             
-            # Lire le fichier généré
             with open(output_path, 'rb') as f:
                 audio_bytes = f.read()
             
-            # Calculer la durée (approximative)
-            duration = len(audio_bytes) / 16000 / 2  # Approximation pour WAV 16kHz
+            duration = len(audio_bytes) / 16000 / 2
             
             latency = time.time() - start_time
             
@@ -163,7 +121,6 @@ class TextToSpeechService:
                 "word_count": len(text.split())
             }
             
-            # Nettoyer le fichier temporaire si créé
             if not output_path or output_path.startswith(tempfile.gettempdir()):
                 try:
                     os.remove(output_path)
@@ -182,10 +139,8 @@ class TextToSpeechService:
         output_path: Optional[str] = None,
         slow: bool = False
     ) -> Tuple[bytes, Dict]:
-        """Synthèse avec gTTS"""
         start_time = time.time()
         try:
-            # Créer un fichier temporaire si nécessaire
             if not output_path:
                 temp_file = tempfile.NamedTemporaryFile(
                     suffix='.mp3',
@@ -194,16 +149,13 @@ class TextToSpeechService:
                 output_path = temp_file.name
                 temp_file.close()
             
-            # Générer la synthèse
             tts = gTTS(text=text, lang=self.language, slow=slow)
             tts.save(output_path)
             
-            # Lire le fichier
             with open(output_path, 'rb') as f:
                 audio_bytes = f.read()
             
-            # Calculer la durée (approximation)
-            duration = len(audio_bytes) / 16000 / 2  # Approximation
+            duration = len(audio_bytes) / 16000 / 2
             
             latency = time.time() - start_time
             
@@ -216,7 +168,6 @@ class TextToSpeechService:
                 "word_count": len(text.split())
             }
             
-            # Nettoyer le fichier temporaire
             if output_path.startswith(tempfile.gettempdir()):
                 try:
                     os.remove(output_path)
@@ -230,7 +181,6 @@ class TextToSpeechService:
             raise
     
     def get_available_voices(self) -> list:
-        """Retourne la liste des voix disponibles"""
         if self.engine_name == "pyttsx3":
             voices = self.engine.getProperty('voices')
             return [
@@ -243,7 +193,6 @@ class TextToSpeechService:
                 for voice in voices
             ]
         elif self.engine_name == "gtts":
-            # gTTS supporte plusieurs langues mais pas de sélection de voix
             return [
                 {"id": "default", "name": f"gTTS {self.language}", "languages": [self.language]}
             ]
@@ -251,7 +200,6 @@ class TextToSpeechService:
             return []
     
     def set_voice(self, voice_id: str):
-        """Change la voix"""
         if self.engine_name == "pyttsx3":
             self.engine.setProperty('voice', voice_id)
             self.voice_id = voice_id
@@ -259,19 +207,16 @@ class TextToSpeechService:
             logger.warning(f"Changement de voix non supporté pour {self.engine_name}")
     
     def set_rate(self, rate: int):
-        """Change la vitesse de parole"""
         if self.engine_name == "pyttsx3":
             self.engine.setProperty('rate', rate)
         self.rate = rate
     
     def set_volume(self, volume: float):
-        """Change le volume"""
         if self.engine_name == "pyttsx3":
             self.engine.setProperty('volume', volume)
         self.volume = volume
     
     def get_info(self) -> Dict:
-        """Retourne les informations sur le service"""
         return {
             "engine": self.engine_name,
             "language": self.language,
@@ -279,4 +224,3 @@ class TextToSpeechService:
             "volume": self.volume,
             "voice_id": self.voice_id
         }
-

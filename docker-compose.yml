@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  python-backend:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    container_name: transvoice-python-backend
+    restart: unless-stopped
+    environment:
+      - WHISPER_MODEL_SIZE=${WHISPER_MODEL_SIZE:-base}
+      - STT_LANGUAGE=${STT_LANGUAGE:-pt}
+      - STT_PREPROCESS=${STT_PREPROCESS:-false}
+      - TTS_ENGINE=${TTS_ENGINE:-pyttsx3}
+      - TTS_LANGUAGE=${TTS_LANGUAGE:-fr}
+      - PYTHON_API_PORT=8000
+    volumes:
+      - python_temp:/tmp/trans_voice
+    networks:
+      - transvoice-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: transvoice-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=5030
+      - PYTHON_API_URL=http://python-backend:8000
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3030}
+    volumes:
+      - ./server/temp:/app/temp
+    networks:
+      - transvoice-network
+    depends_on:
+      python-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5030/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transvoice-frontend
+    restart: unless-stopped
+    ports:
+      - "3030:80"
+    depends_on:
+      - backend
+    networks:
+      - transvoice-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  python_temp:
+    driver: local
+
+networks:
+  transvoice-network:
+    driver: bridge
+
