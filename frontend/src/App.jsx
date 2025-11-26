@@ -77,25 +77,25 @@ function App() {
 
   useEffect(() => {
     if (recordingError) {
-      addLog(`Erreur: ${recordingError}`)
+      addLog(`Error: ${recordingError}`)
     }
   }, [recordingError])
 
   useEffect(() => {
     if (translationError) {
-      addLog(`Erreur traduction: ${translationError}`)
+      addLog(`Translation error: ${translationError}`)
     }
   }, [translationError])
 
   useEffect(() => {
     if (originalText) {
-      addLog(`Transcription reçue: ${originalText.substring(0, 50)}...`)
+      addLog(`Transcription received: ${originalText.substring(0, 50)}...`)
     }
   }, [originalText])
 
   useEffect(() => {
     if (translatedText) {
-      addLog(`Traduction complétée: ${translatedText.substring(0, 50)}...`)
+      addLog(`Translation completed: ${translatedText.substring(0, 50)}...`)
     }
   }, [translatedText])
 
@@ -110,20 +110,20 @@ function App() {
     if (!text || !text.trim()) return
     
     setIsProcessingUpload(true)
-    addLog(`Transcription reçue depuis upload: ${text.substring(0, 50)}...`)
+    addLog(`Transcription received from upload: ${text.substring(0, 50)}...`)
     
     try {
       await translateText(text, targetLanguage)
-      addLog('Traduction complétée depuis upload')
+      addLog('Translation completed from upload')
     } catch (error) {
-      addLog(`Erreur lors de la traduction: ${error.message}`)
+      addLog(`Translation error: ${error.message}`)
     } finally {
       setIsProcessingUpload(false)
     }
   }
 
   const handleUploadError = (error) => {
-    addLog(`Erreur upload: ${error}`)
+    addLog(`Upload error: ${error}`)
   }
 
   return (
@@ -132,10 +132,10 @@ function App() {
         {/* Header */}
         <header className="app-header">
           <h1 className="app-title">
-            🎯 transVoicer
+            transVoicer
           </h1>
           <p className="app-subtitle">
-            Traduction vocale intelligente : Speech-to-Text → Traduction → Text-to-Speech
+            Intelligent Voice Translation: Speech-to-Text → Translation → Text-to-Speech
           </p>
         </header>
 
@@ -143,7 +143,7 @@ function App() {
         <div className="language-selector-container">
           <div className="language-selector">
             <label className="language-label">
-              Langue de traduction
+              Target Language
             </label>
             <select
               value={targetLanguage}
@@ -151,11 +151,11 @@ function App() {
               className="language-select"
               disabled={isRecording || isTranslating}
             >
-              <option value="fr">Français</option>
-              <option value="en">Anglais</option>
-              <option value="es">Espagnol</option>
-              <option value="de">Allemand</option>
-              <option value="it">Italien</option>
+              <option value="fr">French</option>
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+              <option value="de">German</option>
+              <option value="it">Italian</option>
             </select>
           </div>
         </div>
@@ -221,15 +221,15 @@ function App() {
               onClick={handleClear}
               className="clear-button"
             >
-              Effacer tout
+              Clear All
             </button>
           </div>
         )}
 
         {/* Footer */}
         <footer className="app-footer">
-          <p>Application web de traduction vocale intelligente</p>
-          <p>Speech-to-Text → Traduction IA → Text-to-Speech</p>
+          <p>Intelligent Voice Translation Web Application</p>
+          <p>Speech-to-Text → AI Translation → Text-to-Speech</p>
         </footer>
       </div>
     </div>
