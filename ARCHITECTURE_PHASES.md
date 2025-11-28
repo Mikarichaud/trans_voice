@@ -552,3 +552,4 @@ Cette séparation en deux phases permet de :
 
 **Recommandation** : Utiliser **Tags Git** pour marquer les deux phases tout en gardant un historique complet et la possibilité de revenir à la Phase 1 si nécessaire.
 
+

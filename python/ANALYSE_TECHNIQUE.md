@@ -554,3 +554,4 @@ Le dossier `python/` contient une **implémentation robuste et bien structurée*
 
 **Note** : L'API FastAPI génère automatiquement la documentation Swagger à `/docs` et ReDoc à `/redoc`.
 
+

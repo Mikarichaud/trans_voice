@@ -232,3 +232,4 @@ Cette organisation en deux phases permet de :
 
 **Recommandation finale** : Commencez par **Phase 1** si vous êtes nouveau, puis migrez vers **Phase 2** une fois les concepts maîtrisés.
 
+

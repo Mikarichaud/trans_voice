@@ -441,3 +441,4 @@ Cette version permet de comprendre :
 
 Une fois ces concepts maîtrisés, vous pouvez progresser vers **Phase 2** pour découvrir les optimisations et fonctionnalités avancées.
 
+

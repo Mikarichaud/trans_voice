@@ -1105,3 +1105,4 @@ Le frontend est une **implémentation moderne et bien structurée** avec :
 
 **Note** : L'application est prête pour la production avec quelques améliorations recommandées pour la robustesse et l'accessibilité.
 
+
