@@ -129,7 +129,7 @@ function App() {
   return (
     <div className="app-container">
       <div className="app-content">
-        {/* Header */}
+        {}
         <header className="app-header">
           <h1 className="app-title">
             transVoicer
@@ -139,7 +139,7 @@ function App() {
           </p>
         </header>
 
-        {/* Language Selector */}
+        {}
         <div className="language-selector-container">
           <div className="language-selector">
             <label className="language-label">
@@ -160,9 +160,9 @@ function App() {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {}
         <div className="main-grid">
-          {/* Left Column */}
+          {}
           <div className="column">
             <MicrophoneRecorder
               isRecording={isRecording}
@@ -190,7 +190,7 @@ function App() {
             />
           </div>
 
-          {/* Right Column */}
+          {}
           <div className="column">
             <TextToSpeechPlayer
               text={translatedText}
@@ -214,7 +214,7 @@ function App() {
           </div>
         </div>
 
-        {/* Clear Button */}
+        {}
         {(originalText || translatedText) && (
           <div className="clear-button-container">
             <button
@@ -226,7 +226,7 @@ function App() {
           </div>
         )}
 
-        {/* Footer */}
+        {}
         <footer className="app-footer">
           <p>Intelligent Voice Translation Web Application</p>
           <p>Speech-to-Text → AI Translation → Text-to-Speech</p>
@@ -237,5 +237,3 @@ function App() {
 }
 
 export default App
-
-

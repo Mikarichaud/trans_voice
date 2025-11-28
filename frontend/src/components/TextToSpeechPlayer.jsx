@@ -19,7 +19,6 @@ const TextToSpeechPlayer = ({
       const voices = window.speechSynthesis.getVoices()
       setAvailableVoices(voices)
       
-      // Sélectionner automatiquement une voix pour la langue
       if (voices.length > 0 && !selectedVoice) {
         const preferredVoice = voices.find(v => 
           v.lang.startsWith(language.split('-')[0])
@@ -142,5 +141,3 @@ const TextToSpeechPlayer = ({
 }
 
 export default TextToSpeechPlayer
-
-

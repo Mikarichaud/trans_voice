@@ -19,14 +19,12 @@ export const useTTS = () => {
       return
     }
 
-    // Arrêter toute lecture en cours proprement
-    // Nettoyer l'ancien utterance s'il existe pour éviter les erreurs "interrupted"
     if (utteranceRef.current) {
-      utteranceRef.current.onerror = null // Désactiver les handlers pour éviter les erreurs
+      utteranceRef.current.onerror = null
       utteranceRef.current.onend = null
       utteranceRef.current.onstart = null
     }
-    
+
     if (synthRef.current.speaking || synthRef.current.pending) {
       synthRef.current.cancel()
     }
@@ -34,7 +32,7 @@ export const useTTS = () => {
     setCurrentText(text)
     setTtsError(null)
     setIsPaused(false)
-    setIsPlaying(false) // Réinitialiser l'état avant de démarrer
+    setIsPlaying(false)
 
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = language
@@ -42,7 +40,6 @@ export const useTTS = () => {
     utterance.pitch = 1.0
     utterance.volume = 1.0
 
-    // Sélectionner une voix si disponible
     if (voice) {
       utterance.voice = voice
     } else {
@@ -73,16 +70,14 @@ export const useTTS = () => {
     }
 
     utterance.onerror = (event) => {
-      // Ignorer les erreurs "interrupted" car elles sont normales
-      // quand on annule une synthèse en cours pour en démarrer une nouvelle
+
       if (event.error === 'interrupted') {
-        // C'est normal, on ignore silencieusement
+
         setIsPlaying(false)
         setIsPaused(false)
         return
       }
-      
-      // Pour les autres erreurs, on les log et on affiche un message
+
       console.error('Erreur TTS:', event)
       setTtsError(`Erreur lors de la synthèse vocale: ${event.error || 'erreur inconnue'}`)
       setIsPlaying(false)
@@ -92,7 +87,6 @@ export const useTTS = () => {
     utteranceRef.current = utterance
     synthRef.current.speak(utterance)
 
-    // Mesurer la latence (temps avant le début de la lecture)
     const latencyStart = Date.now()
     const checkLatency = setInterval(() => {
       if (synthRef.current.speaking) {
@@ -146,5 +140,3 @@ export const useTTS = () => {
     getAvailableVoices
   }
 }
-
-

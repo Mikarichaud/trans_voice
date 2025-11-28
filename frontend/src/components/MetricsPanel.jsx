@@ -31,7 +31,7 @@ const MetricsPanel = ({
       </h3>
 
       <div className="space-y-6">
-        {/* Métriques d'enregistrement */}
+        {}
         <div>
           <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
             Audio Recording
@@ -66,7 +66,7 @@ const MetricsPanel = ({
           </div>
         </div>
 
-        {/* Métriques de traduction */}
+        {}
         <div>
           <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
             Translation
@@ -93,7 +93,7 @@ const MetricsPanel = ({
           </div>
         </div>
 
-        {/* Métriques TTS */}
+        {}
         {ttsMetrics && (ttsMetrics.latency || ttsMetrics.duration) && (
           <div>
             <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
@@ -116,7 +116,7 @@ const MetricsPanel = ({
           </div>
         )}
 
-        {/* Logs */}
+        {}
         {logs.length > 0 && (
           <div>
             <h4 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
@@ -138,5 +138,3 @@ const MetricsPanel = ({
 }
 
 export default MetricsPanel
-
-

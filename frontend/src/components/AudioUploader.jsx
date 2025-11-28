@@ -9,7 +9,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
   const handleFileSelect = (event) => {
     const file = event.target.files[0]
     if (file) {
-      // Vérifier le type de fichier
+
       const validTypes = ['audio/webm', 'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/m4a', 'audio/x-m4a']
       const validExtensions = ['.webm', '.wav', '.mp3', '.mpeg', '.ogg', '.m4a']
       
@@ -21,8 +21,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
         return
       }
       
-      // Vérifier la taille (max 50MB)
-      const maxSize = 50 * 1024 * 1024 // 50MB
+      const maxSize = 50 * 1024 * 1024
       if (file.size > maxSize) {
         onError('File is too large. Maximum size: 50MB')
         return
@@ -36,7 +35,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
     if (!selectedFile) return
 
     setIsUploading(true)
-    onError(null) // Réinitialiser les erreurs précédentes
+    onError(null)
     
     try {
       const formData = new FormData()
@@ -47,7 +46,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
 
       const pythonApiUrl = process.env.NODE_ENV === 'production'
         ? '/api/stt'
-        : (import.meta.env.VITE_PYTHON_API_URL || 'http://localhost:8000')
+        : (import.meta.env.VITE_PYTHON_API_URL || 'http:
       const apiEndpoint = process.env.NODE_ENV === 'production'
         ? `${pythonApiUrl}/transcribe`
         : `${pythonApiUrl}/api/stt/transcribe`
@@ -58,7 +57,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          timeout: 120000 // 2 minutes pour les gros fichiers
+          timeout: 120000
         }
       )
 
@@ -97,17 +96,12 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
       </h3>
       
       <div className="space-y-4">
-        {/* Input file caché */}
+        {}
         <input
           ref={fileInputRef}
           type="file"
-          accept="audio/*,.webm,.wav,.mp3,.mpeg,.ogg,.m4a"
-          onChange={handleFileSelect}
-          className="hidden"
-          disabled={isUploading || isProcessing}
-        />
-
-        {/* Bouton pour sélectionner le fichier */}
+          accept="audio
+}
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading || isProcessing}
@@ -124,7 +118,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
           {selectedFile ? 'Change File' : 'Select Audio File'}
         </button>
 
-        {/* Affichage du fichier sélectionné */}
+        {}
         {selectedFile && (
           <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-700/50 backdrop-blur-sm">
             <div className="flex items-center justify-between">
@@ -150,7 +144,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
           </div>
         )}
 
-        {/* Bouton pour uploader */}
+        {}
         {selectedFile && (
           <button
             onClick={handleUpload}
@@ -167,7 +161,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
           >
             {isUploading ? (
               <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http:
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -179,7 +173,7 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
           </button>
         )}
 
-        {/* Info */}
+        {}
         <div className="text-xs text-slate-400 text-center space-y-1">
           <p>Supported formats: WAV, MP3, WebM, OGG, M4A</p>
           <p>Maximum size: 50MB</p>
@@ -190,4 +184,3 @@ const AudioUploader = ({ onTranscription, onError, isProcessing }) => {
 }
 
 export default AudioUploader
-

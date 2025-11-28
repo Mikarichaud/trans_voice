@@ -13,7 +13,7 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
   const translationStartTimeRef = useRef(null)
 
   useEffect(() => {
-    // Fonction pour attacher le listener
+
     const attachListener = () => {
       if (!wsRef.current) {
         console.log('[useTranslation] WebSocket non disponible, attente...')
@@ -25,7 +25,7 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
 
       const handleMessage = async (event) => {
         try {
-        // Si c'est un Blob (audio), on l'ignore côté client
+
         if (event.data instanceof Blob) {
           return
         }
@@ -37,13 +37,12 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
           console.log('[useTranslation] Transcription reçue:', data.text?.substring(0, 50))
           setOriginalText(data.text)
           setTranslationError(null)
-          
-          // Démarrer la traduction
+
           if (data.text && data.text.trim()) {
             console.log('[useTranslation] Démarrage de la traduction...')
             translationStartTimeRef.current = Date.now()
             setIsTranslating(true)
-            
+
             try {
               const response = await fetch('/api/translate', {
                 method: 'POST',
@@ -63,7 +62,7 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
               const result = await response.json()
               console.log('[useTranslation] Traduction reçue:', result.translatedText?.substring(0, 50))
               setTranslatedText(result.translatedText)
-              
+
               const latency = Date.now() - translationStartTimeRef.current
               setTranslationMetrics({
                 latency,
@@ -96,24 +95,22 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
       }
     }
 
-    // Attacher immédiatement si disponible
     let cleanup = attachListener()
-    
-    // Si la WebSocket n'est pas disponible, réessayer après un court délai
+
     if (!wsRef.current) {
       const timeoutId = setTimeout(() => {
         const newCleanup = attachListener()
         if (newCleanup) {
           cleanup = newCleanup
         }
-      }, 500) // Réessayer après 500ms
-      
+      }, 500)
+
       return () => {
         clearTimeout(timeoutId)
         if (cleanup) cleanup()
       }
     }
-    
+
     return cleanup || (() => {})
   }, [wsRef, targetLanguage])
 
@@ -124,7 +121,6 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
     setTranslationMetrics({ latency: null, wordCount: 0 })
   }
 
-  // Fonction pour déclencher manuellement une traduction depuis un texte
   const translateText = async (text, lang = targetLanguage) => {
     if (!text || !text.trim()) return
 
@@ -146,7 +142,7 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
       })
 
       if (!response.ok) {
-        // Essayer de récupérer le message d'erreur du serveur
+
         let errorMessage = 'Erreur lors de la traduction'
         try {
           const errorData = await response.json()
@@ -159,7 +155,7 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
 
       const result = await response.json()
       setTranslatedText(result.translatedText)
-      
+
       const latency = Date.now() - translationStartTimeRef.current
       setTranslationMetrics({
         latency,
@@ -173,7 +169,6 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
     }
   }
 
-
   return {
     originalText,
     translatedText,
@@ -184,5 +179,3 @@ export const useTranslation = (wsRef, targetLanguage = 'fr') => {
     translateText
   }
 }
-
-

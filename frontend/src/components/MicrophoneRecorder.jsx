@@ -49,7 +49,7 @@ const MicrophoneRecorder = ({ isRecording, onStart, onStop, microphoneStatus, er
               }
             }}
             onMouseDown={(e) => {
-              // Feedback visuel immédiat
+
               e.currentTarget.style.transform = 'scale(0.95)'
             }}
             onMouseUp={(e) => {
@@ -122,5 +122,3 @@ const MicrophoneRecorder = ({ isRecording, onStart, onStop, microphoneStatus, er
 }
 
 export default MicrophoneRecorder
-
-
