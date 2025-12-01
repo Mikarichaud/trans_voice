@@ -32,11 +32,11 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:5030',
         changeOrigin: true
       },
       '/ws': {
-        target: 'ws://localhost:3001',
+        target: 'ws://localhost:5030',
         ws: true
       }
     }

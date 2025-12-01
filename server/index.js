@@ -2,11 +2,16 @@ const express = require('express')
 const http = require('http')
 const WebSocket = require('ws')
 const path = require('path')
-require('dotenv').config()
+const fs = require('fs')
+
+if (fs.existsSync(path.join(__dirname, '..', '.env.local'))) {
+  require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') })
+}
+require('dotenv').config({ override: false })
 
 const app = express()
 const server = http.createServer(app)
-const wss = new WebSocket.Server({ server })
+const wss = new WebSocket.Server({ server, path: '/ws' })
 
 app.use(express.json())
 app.use(express.static(path.join(__dirname, '../frontend/dist')))
@@ -113,11 +118,11 @@ async function processAudioChunks(sessionId) {
 
     session.audioChunks = []
   } catch (error) {
-    console.error(`[STT] Erreur lors de la transcription:`, error)
+    console.error(`[STT] Transcription error:`, error)
     if (session.ws && session.ws.readyState === 1) {
       session.ws.send(JSON.stringify({
         type: 'error',
-        message: `Erreur de transcription: ${error.message}`
+        message: `Transcription error: ${error.message}`
       }))
     }
   }
@@ -151,11 +156,11 @@ async function handleEndOfRecording(sessionId) {
 
     console.log(`[Session] Enregistrement terminé: ${sessionId}`)
   } catch (error) {
-    console.error(`[Session] Erreur lors du traitement final:`, error)
+    console.error(`[Session] Final processing error:`, error)
     if (session && session.ws && session.ws.readyState === 1) {
       session.ws.send(JSON.stringify({
         type: 'error',
-        message: `Erreur lors du traitement final: ${error.message}`
+        message: `Final processing error: ${error.message}`
       }))
     }
   }
@@ -167,7 +172,7 @@ app.post('/api/translate', async (req, res) => {
     const { text, targetLanguage } = req.body
 
     if (!text || !text.trim()) {
-      return res.status(400).json({ error: 'Texte requis' })
+      return res.status(400).json({ error: 'Text required' })
     }
 
     const translatedText = await translateText(text, targetLanguage || 'fr')
@@ -179,11 +184,11 @@ app.post('/api/translate', async (req, res) => {
       timestamp: Date.now()
     })
   } catch (error) {
-    console.error('[API] Erreur de traduction:', error)
+    console.error('[API] Translation error:', error)
 
-    if (error.message === 'Texte vide') {
+    if (error.message === 'Texte vide' || error.message === 'Empty text') {
       return res.status(400).json({ 
-        error: 'Texte requis',
+        error: 'Text required',
         message: error.message 
       })
     }
@@ -196,11 +201,11 @@ app.post('/api/translate', async (req, res) => {
         sourceLanguage: 'pt-BR',
         targetLanguage: targetLanguage || 'fr',
         timestamp: Date.now(),
-        warning: 'Mode simulation (API Gemini indisponible)'
+        warning: 'Simulation mode (Gemini API unavailable)'
       })
     } catch (simError) {
       res.status(500).json({ 
-        error: 'Erreur lors de la traduction',
+        error: 'Translation error',
         message: error.message 
       })
     }

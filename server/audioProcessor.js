@@ -15,11 +15,11 @@ async function processAudioStream(audioBuffer) {
 
   try {
     if (!audioBuffer || audioBuffer.length === 0) {
-      throw new Error('Buffer audio vide')
+      throw new Error('Empty audio buffer')
     }
 
     if (!(await checkPythonServiceAvailable())) {
-      throw new Error('Service Python STT non disponible. Veuillez démarrer le service Python (python/api.py).')
+      throw new Error('Python STT service not available. Please start the Python service (python/api.py).')
     }
 
     tempFile = path.join(TEMP_DIR, `audio_${Date.now()}.webm`)
@@ -91,19 +91,26 @@ async function transcribeWithPythonService(audioFile) {
 }
 
 async function checkPythonServiceAvailable(retries = 3, delay = 1000) {
+  console.log(`[STT] Checking Python service at ${PYTHON_API_URL}/health`)
   for (let i = 0; i < retries; i++) {
     try {
       const response = await axios.get(`${PYTHON_API_URL}/health`, {
         timeout: 5000
       })
+      console.log(`[STT] Python service health check response:`, response.data)
       if (response.data.status === 'healthy' && response.data.stt_ready) {
+        console.log(`[STT] Python service is available and ready`)
         return true
+      } else {
+        console.warn(`[STT] Python service health check failed: status=${response.data.status}, stt_ready=${response.data.stt_ready}`)
       }
     } catch (error) {
+      console.warn(`[STT] Python service health check attempt ${i + 1}/${retries} failed:`, error.message)
       if (i < retries - 1) {
         await new Promise(resolve => setTimeout(resolve, delay))
         continue
       }
+      console.error(`[STT] Python service not available after ${retries} attempts`)
       return false
     }
   }

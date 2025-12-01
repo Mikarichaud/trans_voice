@@ -4,9 +4,12 @@ import AudioUploader from './components/AudioUploader'
 import TranslationDisplay from './components/TranslationDisplay'
 import TextToSpeechPlayer from './components/TextToSpeechPlayer'
 import MetricsPanel from './components/MetricsPanel'
+import PullToRefreshIndicator from './components/PullToRefreshIndicator'
+import ProcessingStatus from './components/ProcessingStatus'
 import { useSpeechRecognition } from './hooks/useSpeechRecognition'
 import { useTranslation } from './hooks/useTranslation'
 import { useTTS } from './hooks/useTTS'
+import { usePullToRefresh } from './hooks/usePullToRefresh'
 import axios from 'axios'
 import './App.css'
 
@@ -23,7 +26,9 @@ function App() {
     wsRef,
     getMetrics: getRecordingMetrics,
     recordingTime,
-    maxRecordingTime
+    maxRecordingTime,
+    isSending,
+    isTranscribing
   } = useSpeechRecognition()
 
   const {
@@ -126,8 +131,32 @@ function App() {
     addLog(`Upload error: ${error}`)
   }
 
+  const handleRefresh = async () => {
+    return new Promise((resolve) => {
+      handleClear()
+      setTimeout(() => {
+        window.location.reload()
+        resolve()
+      }, 300)
+    })
+  }
+
+  const {
+    containerRef,
+    pullDistance,
+    isRefreshing,
+    progress,
+    shouldShowIndicator
+  } = usePullToRefresh(handleRefresh, 80)
+
   return (
-    <div className="app-container">
+    <div className="app-container" ref={containerRef}>
+      <PullToRefreshIndicator
+        progress={progress}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+        threshold={80}
+      />
       <div className="app-content">
         {}
         <header className="app-header">
@@ -178,6 +207,16 @@ function App() {
               onTranscription={handleUploadTranscription}
               onError={handleUploadError}
               isProcessing={isProcessingUpload || isTranslating}
+            />
+
+            <ProcessingStatus
+              isRecording={isRecording}
+              isSending={isSending}
+              isTranscribing={isTranscribing}
+              transcriptionReceived={!!originalText}
+              isTranslating={isTranslating}
+              translationReceived={!!translatedText}
+              error={recordingError || translationError}
             />
 
             <TranslationDisplay

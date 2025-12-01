@@ -50,20 +50,20 @@ async function findAvailableModel() {
 
 async function translateText(text, targetLanguage = 'fr') {
   if (!text || !text.trim()) {
-    throw new Error('Texte vide')
+    throw new Error('Empty text')
   }
 
   if (genAI) {
     try {
       return await translateWithGemini(text, targetLanguage)
     } catch (error) {
-      console.warn('[Translation] Gemini a échoué, utilisation du mode simulation:', error.message)
-      console.warn('[Translation] Erreur détaillée:', error)
+      console.warn('[Translation] Gemini failed, using simulation mode:', error.message)
+      console.warn('[Translation] Detailed error:', error)
       return simulateTranslation(text, targetLanguage)
     }
   }
 
-  console.warn('[Translation] Gemini API non configurée, utilisation du mode simulation')
+  console.warn('[Translation] Gemini API not configured, using simulation mode')
   return simulateTranslation(text, targetLanguage)
 }
 
@@ -74,7 +74,7 @@ async function translateWithGemini(text, targetLanguage) {
     }
 
     if (!availableModel) {
-      throw new Error('Aucun modèle Gemini disponible. Vérifiez votre clé API et les modèles disponibles.')
+      throw new Error('No Gemini model available. Please check your API key and available models.')
     }
 
     const model = genAI.getGenerativeModel({ model: availableModel })
@@ -106,8 +106,8 @@ Traduction:`
       .replace(/^Traduction:\s*/i, '')
       .trim()
   } catch (error) {
-    console.error('[Gemini] Erreur de traduction:', error)
-    throw new Error(`Erreur de traduction: ${error.message}`)
+    console.error('[Gemini] Translation error:', error)
+    throw new Error(`Translation error: ${error.message}`)
   }
 }
 
@@ -156,7 +156,7 @@ function simulateTranslation(text, targetLanguage) {
     return langTranslations[text]
   }
 
-  return `[Mode simulation - ${targetLanguage}] ${text}`
+  return `[Simulation mode - ${targetLanguage}] ${text}`
 }
 
 module.exports = {

@@ -6,6 +6,8 @@ export const useSpeechRecognition = () => {
   const [error, setError] = useState(null)
   const [microphoneStatus, setMicrophoneStatus] = useState('disconnected')
   const [recordingTime, setRecordingTime] = useState(0)
+  const [isSending, setIsSending] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
 
   const mediaRecorderRef = useRef(null)
   const audioStreamRef = useRef(null)
@@ -41,9 +43,7 @@ export const useSpeechRecognition = () => {
     }
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = process.env.NODE_ENV === 'production' 
-      ? `${protocol}
-      : `${protocol}
+    const wsUrl = `${protocol}//${window.location.host}/ws`
 
     console.log('[useSpeechRecognition] Tentative de connexion WebSocket:', wsUrl)
     wsRef.current = new WebSocket(wsUrl)
@@ -64,10 +64,17 @@ export const useSpeechRecognition = () => {
         const data = JSON.parse(event.data)
         if (data.type === 'transcription') {
           console.log('[useSpeechRecognition] Transcription reçue via WebSocket')
+          setIsTranscribing(false)
+          setIsSending(false)
         } else if (data.type === 'connected') {
           console.log('[useSpeechRecognition] Session connectée:', data.sessionId)
         } else if (data.type === 'error') {
           console.error('[useSpeechRecognition] Erreur reçue:', data.message)
+          setIsTranscribing(false)
+          setIsSending(false)
+        } else if (data.type === 'processing') {
+          setIsTranscribing(true)
+          setIsSending(false)
         }
       } catch (e) {
 
@@ -159,6 +166,8 @@ export const useSpeechRecognition = () => {
       metricsRef.current.audioChunksCount = 0
       metricsRef.current.totalBytes = 0
       isStoppingRef.current = false
+      setIsSending(false)
+      setIsTranscribing(false)
 
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         try {
@@ -327,10 +336,16 @@ export const useSpeechRecognition = () => {
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       try {
+        setIsSending(true)
         wsRef.current.send(JSON.stringify({ type: 'end' }))
         console.log('Signal de fin envoyé au serveur')
+        setTimeout(() => {
+          setIsTranscribing(true)
+          setIsSending(false)
+        }, 500)
       } catch (err) {
         console.error('Erreur lors de l\'envoi du signal de fin:', err)
+        setIsSending(false)
       }
     }
 
@@ -422,6 +437,8 @@ export const useSpeechRecognition = () => {
     wsRef,
     getMetrics,
     recordingTime,
-    maxRecordingTime
+    maxRecordingTime,
+    isSending,
+    isTranscribing
   }
 }

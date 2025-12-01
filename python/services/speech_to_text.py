@@ -249,19 +249,43 @@ class SpeechToTextService:
             text = text.strip()
 
             if len(text) > 10:
-                repeated_pattern = re.search(r'(.)\1{4,}', text)
-                if repeated_pattern:
-                    repeated_char = repeated_pattern.group(1)
-                    logger.error(f"❌ PROBLÈME: Répétitions suspectes détectées même après rechargement!")
-                    logger.error(f"❌ Caractère répété: '{repeated_char}'")
-                    logger.error(f"❌ Texte complet: {text[:200]}")
+                words = text.split()
+                if len(words) > 2:
+                    for ngram_size in [4, 3, 2]:
+                        if len(words) >= ngram_size * 2:
+                            ngram = ' '.join(words[:ngram_size])
+                            ngram_repeated = (ngram + ' ') * 2
+                            if ngram_repeated.strip() in text:
+                                logger.warning(f"⚠️  Répétition de {ngram_size}-gram détectée: '{ngram}'")
+                                words_cleaned = []
+                                i = 0
+                                last_ngram = None
+                                while i < len(words):
+                                    if i + ngram_size <= len(words):
+                                        current_ngram = ' '.join(words[i:i+ngram_size])
+                                        if current_ngram == last_ngram:
+                                            i += ngram_size
+                                            continue
+                                        last_ngram = current_ngram
+                                    words_cleaned.append(words[i])
+                                    i += 1
+                                text_cleaned = ' '.join(words_cleaned)
+                                if len(text_cleaned) < len(text) * 0.7 and len(text_cleaned) > 0:
+                                    logger.warning(f"⚠️  Texte nettoyé: {len(text)} → {len(text_cleaned)} caractères")
+                                    text = text_cleaned
+                                    break
+                
+                repeated_char = re.search(r'(.)\1{4,}', text)
+                if repeated_char:
+                    repeated_char = repeated_char.group(1)
+                    logger.error(f"❌ PROBLÈME: Répétitions de caractères détectées!")
 
                     text_cleaned = re.sub(r'(.)\1{2,}', r'\1\1', text)
                     if text_cleaned != text:
                         logger.warning(f"⚠️  Tentative de nettoyage: {text_cleaned[:100]}")
                         text = text_cleaned
                     else:
-                        logger.error(f"❌ Transcription trop corrompue, impossible de nettoyer")
+                        logger.error(f"❌ Transcription trop corrompue")
                         raise ValueError(f"Transcription corrompue avec répétitions: {text[:100]}")
 
             logger.info(f"✅ Texte transcrit (premiers 100 caractères): {text[:100]}")
